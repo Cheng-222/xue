@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小雪大王世界最可爱</title>
+    
+    <style type="text/css">
+        #_copy {
+            align-items: center;
+            background: #4494d5;
+            border-radius: 3px;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            font-size: 13px;
+            height: 30px;
+            justify-content: center;
+            position: absolute;
+            width: 60px;
+            z-index: 1000
+        }
+
+        #select-tooltip,
+        #sfModal,
+        .modal-backdrop,
+        div[id^=reader-helper] {
+            display: none !important
+        }
+
+        .modal-open {
+            overflow: auto !important
+        }
+
+        ._sf_adjust_body {
+            padding-right: 0 !important
+        }
+
+        .enable_copy_btns_div {
+            position: fixed;
+            width: 154px;
+            left: 10px;
+            top: 45%;
+            background: #e7f1ff;
+            border: 2px solid #4595d5;
+            font-weight: 600;
+            border-radius: 2px;
+            font-family: -apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica Neue, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
+            z-index: 5000
+        }
+
+        .enable_copy_btns_logo {
+            width: 100%;
+            background: #4595d5;
+            text-align: center;
+            font-size: 12px;
+            color: #e7f1ff;
+            line-height: 30px;
+            height: 30px
+        }
+
+        .enable_copy_btns_btn {
+            display: block;
+            width: 128px;
+            height: 28px;
+            background: #7f5711;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 12px;
+            border: 0;
+            outline: 0;
+            margin: 8px auto;
+            font-weight: 700;
+            cursor: pointer;
+            opacity: .9
+        }
+
+        .enable_copy_btns_btn:hover {
+            opacity: .8
+        }
+
+        .enable_copy_btns_btn:active {
+            opacity: 1
+        }
+
+        body {
+            background-color: #f1d5da;
+            /* 浅粉色 */
+            text-align: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 页面内容居中 */
+        .container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* 让图片大小适中 */
+        #mainImage {
+            width: 200px;
+            transition: all 0.3s ease;
+        }
+
+        /* 文字 */
+        h1 {
+            font-size: 28px;
+            color: #68495b;
+        }
+
+        /* 按钮样式 */
+        button {
+            font-size: 18px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        #yes {
+            background-color: #d4818e;
+            /* 粉色 */
+            color: white;
+        }
+
+        #no {
+            background-color: #6784b1;
+            /* 蓝色 */
+            color: white;
+            position: relative;
+        }
+
+        /* Yes 完全填满屏幕 */
+        .yes-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #ffdae0;
+            /* 粉色 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body inmaintabuse="1">
+    <div class="container">
+        <img id="mainImage" src="images/heart.png" alt="爱心">
+        <h1 id="question">你觉得雪雪是世界上最可爱的女孩子吗？</h1>
+        <div class="buttons">
+            <button id="yes">那当然！</button>
+            <button id="no">才不是</button>
+            <div id="extwaiokist" style="display:none" v="fifea" q="f5663ac1" c="852.1" i="857" u="600.8" s="01192501"
+                sg="svr_undefined-ga_01192501-bai_12132421" d="1" w="false" e="" a="2" m="BMe=" vn="9zsim">
+                <div id="extwaigglbit" style="display:none" v="fifea" q="f5663ac1" c="852.1" i="857" u="600.8"
+                    s="01192501" sg="svr_undefined-ga_01192501-bai_12132421" d="1" w="false" e="" a="2" m="BMe="></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let yesButton = document.getElementById("yes");
+        let noButton = document.getElementById("no");
+        let questionText = document.getElementById("question");
+        let mainImage = document.getElementById("mainImage");
+
+        let clickCount = 0;  // 记录点击 No 的次数
+
+        // No 按钮的文字变化
+        const noTexts = [
+            "？你认真的吗…",
+            "要不再想想？",
+            "不许选这个！ ",
+            "我会很伤心…",
+            "不行:("
+        ];
+
+        // No 按钮点击事件
+        noButton.addEventListener("click", function () {
+            clickCount++;
+
+            // 让 Yes 变大，每次放大 2 倍
+            let yesSize = 1 + (clickCount * 1.2);
+            yesButton.style.transform = `scale(${yesSize})`;
+
+            // 挤压 No 按钮，每次右移 100px
+            let noOffset = clickCount * 50;
+            noButton.style.transform = `translateX(${noOffset}px)`;
+
+            // **新增：让图片和文字往上移动**
+            let moveUp = clickCount * 25; // 每次上移 20px
+            mainImage.style.transform = `translateY(-${moveUp}px)`;
+            questionText.style.transform = `translateY(-${moveUp}px)`;
+
+            // No 文案变化（前 5 次变化）
+            if (clickCount <= 5) {
+                noButton.innerText = noTexts[clickCount - 1];
+            }
+
+            // 图片变化（前 5 次变化）
+            if (clickCount === 1) mainImage.src = "images/shocked.png"; // 震惊
+            if (clickCount === 2) mainImage.src = "images/think.png";   // 思考
+            if (clickCount === 3) mainImage.src = "images/angry.png";   // 生气
+            if (clickCount === 4) mainImage.src = "images/crying.png";  // 哭
+            if (clickCount >= 5) mainImage.src = "images/crying.png";  // 之后一直是哭
+
+        });
+
+        // Yes 按钮点击后，进入表白成功页面
+        yesButton.addEventListener("click", function () {
+            document.body.innerHTML = `
+        <div class="yes-screen">
+            <h1 class="yes-text">!!!就知道你超级有品味!! ( >᎑<)♡︎ᐝ</h1>
+            <img src="images/hug.png" alt="拥抱" class="yes-image">
+        </div>
+    `;
+
+            document.body.style.overflow = "hidden";
+        });
+    </script>
+
+    <script src="chrome-extension://nhiheekdcnmfbapkmpbhmplfddenhjic/sm.bundle.js" data-pname="supercopy-v3"
+        data-asset-path="https://spc4e.s3.ap-east-1.amazonaws.com"></script>
+</body>
+
+</html>
