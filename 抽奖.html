@@ -77,7 +77,67 @@
     syncInputs(segments);
     function readPrizes(){const vals=Array.from(itemsEl.querySelectorAll('.prize-input')).map((inp,i)=>{const v=inp.value.trim();return v||`奖品${i+1}`});return vals}
     function fitLines(text,avail,maxFont,minFont){const isCJK=/[\u4e00-\u9fff]/.test(text);let tokens=isCJK?text.split(''):text.split(/\s+/).filter(Boolean);for(let font=maxFont;font>=minFont;font-=1){ctx.font=`${font}px system-ui`;if(ctx.measureText(text).width<=avail)return{lines:[text],font};let line1='',line2='';let k=0;for(;k<tokens.length;k++){const t1=line1+(isCJK?tokens[k]:(line1?' ':'')+tokens[k]);if(ctx.measureText(t1).width<=avail){line1=t1}else{break}}for(let j=k;j<tokens.length;j++){const t2=line2+(isCJK?tokens[j]:(line2?' ':'')+tokens[j]);if(ctx.measureText(t2).width<=avail){line2=t2}else{while(line2 && ctx.measureText(line2+'…').width>avail){line2=isCJK?line2.slice(0,-1):line2.replace(/\s*\S+$/,'')}line2=line2?(line2+'…'):'…';return{lines:[line1,line2],font}}}if(line1||line2)return{lines:[line1,line2].filter(Boolean),font}}ctx.font=`${minFont}px system-ui`;let t=text;while(t && ctx.measureText(t+'…').width>avail){t=isCJK?t.slice(0,-1):t.replace(/\s*\S+$/,'')}return{lines:[t?(t+'…'):'…'],font:minFont}}
-    function draw(){const r=size/2;ctx.clearRect(0,0,size,size);const per=2*Math.PI/segments;for(let i=0;i<segments;i++){ctx.beginPath();ctx.moveTo(r,r);ctx.arc(r,r,r-10,i*per,(i+1)*per);ctx.fillStyle=`hsl(${i*360/segments},70%,60%)`;ctx.fill();ctx.save();ctx.translate(r,r);ctx.rotate(i*per+per/2);const text=prizes[i%prizes.length]||`奖品${i+1}`;const labelR=r*(0.62-Math.min(0.12,Math.max(0,segments-8)*0.01));const avail=2*labelR*Math.sin(per/2)-10;const baseFont=Math.max(12,r*0.09);const {lines,font}=fitLines(text,Math.max(40,avail),baseFont,10);ctx.fillStyle='#222';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`${font}px system-ui`;if(lines.length<=1){ctx.fillText(lines[0],0,-labelR)}else{const gap=Math.max(10,font*0.9);ctx.fillText(lines[0],0,-labelR-gap/2);ctx.fillText(lines[1],0,-labelR+gap/2)}ctx.restore()}ctx.beginPath();ctx.arc(r,r,r*0.08,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.beginPath();ctx.arc(r,r,r*0.03,0,Math.PI*2);ctx.fillStyle='#ff5252';ctx.fill()}
+    function draw(){
+      const r = size/2;
+      ctx.clearRect(0,0,size,size);
+      const per = 2*Math.PI/segments;
+      for(let i=0;i<segments;i++){
+        // 扇区
+        ctx.beginPath();
+        ctx.moveTo(r,r);
+        ctx.arc(r,r,r-10,i*per,(i+1)*per);
+        ctx.fillStyle = `hsl(${i*360/segments},70%,60%)`;
+        ctx.fill();
+    
+        // 文本
+        ctx.save();
+        ctx.translate(r,r);
+        const angle = i*per + per/2;
+        const flip = angle > Math.PI/2 && angle < 3*Math.PI/2; // 下半部翻转，保证文字正向
+        ctx.rotate(flip ? angle + Math.PI : angle);
+    
+        const text = prizes[i%prizes.length] || `奖品${i+1}`;
+        const labelR = r * (0.62 - Math.min(0.12, Math.max(0, segments-8) * 0.01));
+        const avail = 2 * labelR * Math.sin(per/2) - 10;
+        const baseFont = Math.max(12, r*0.09);
+        let { lines, font } = fitLines(text, Math.max(40, avail), baseFont, 10);
+        // 兜底，确保至少有一行可渲染
+        if(!lines || !lines.length || !lines[0].trim()){
+          lines = [text.length ? text : '…'];
+        }
+        ctx.fillStyle = '#222';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `${font}px system-ui`;
+    
+        // 始终沿径向外侧放置；翻转后外缘为正向y
+        const y0 = flip ? labelR : -labelR;
+        if(lines.length <= 1){
+          ctx.fillText(lines[0], 0, y0);
+        } else {
+          const gap = Math.max(10, font*0.9);
+          if(!flip){
+            // 未翻转：第一行靠外缘（更负的y）
+            ctx.fillText(lines[0], 0, y0 - gap/2);
+            ctx.fillText(lines[1], 0, y0 + gap/2);
+          } else {
+            // 已翻转：第一行靠外缘（更正的y）
+            ctx.fillText(lines[0], 0, y0 + gap/2);
+            ctx.fillText(lines[1], 0, y0 - gap/2);
+          }
+        }
+        ctx.restore();
+      }
+      // 轴心
+      ctx.beginPath();
+      ctx.arc(r,r,r*0.08,0,Math.PI*2);
+      ctx.fillStyle='#fff';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(r,r,r*0.03,0,Math.PI*2);
+      ctx.fillStyle='#ff5252';
+      ctx.fill();
+    }
     draw();
     countEl.addEventListener('input',()=>{syncInputs(countEl.value)});
     document.getElementById('build').onclick=function(){syncInputs(countEl.value);prizes=readPrizes();segments=prizes.length;countEl.value=segments;localStorage.setItem('wheel.prizes',JSON.stringify(prizes));localStorage.setItem('wheel.count',segments);rotor.style.transition='none';rotor.style.transform='rotate(0deg)';setTimeout(()=>{rotor.offsetHeight;draw();rotor.style.transition=''},50)};
