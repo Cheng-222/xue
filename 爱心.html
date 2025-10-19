@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+  <title>动态大爱心</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:radial-gradient(1200px circle at 10% 0%,#ffe6f0,#fff6f9 35%,#eaf6ff 70%);font-family:system-ui,-apple-system,Segoe UI,Roboto,Noto Sans,Arial;color:#222;display:flex;align-items:center;justify-content:center;padding:16px}
+    .app{width:100%;max-width:1000px}
+    .card{background:rgba(255,255,255,.9);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.15);padding:18px}
+    h1{margin:0 0 12px;font-size:24px;text-align:center;color:#ff4b6e;letter-spacing:.2em}
+    .top{display:flex;gap:18px;align-items:center;justify-content:center;flex-wrap:wrap}
+    .stage{position:relative;width:min(88vmin,760px);height:min(88vmin,760px);min-width:280px;min-height:280px;border-radius:24px;background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,.35));box-shadow:inset 0 0 60px rgba(255,80,120,.15),0 12px 24px rgba(0,0,0,.12);display:grid;place-items:center}
+    canvas{width:100%;height:100%}
+    .panel{flex:1;min-width:280px;display:flex;flex-direction:column;gap:10px}
+    label{font-size:13px;color:#666}
+    input,select{width:100%;border:1px solid #e6e6e6;border-radius:12px;padding:12px 14px;font-size:15px;background:rgba(255,255,255,.9);outline:none}
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+    button{flex:1;border:0;border-radius:14px;padding:12px 16px;background:#f0f3f7;color:#333;font-weight:600;cursor:pointer;transition:transform .08s ease,box-shadow .2s ease}
+    button:hover{transform:translateY(-1px)}
+    button.primary{background:#ff4b6e;color:#fff;box-shadow:0 10px 18px rgba(255,75,110,.25)}
+    .tip{font-size:12px;color:#999}
+    #overlayText{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;color:#fff;text-align:center;text-shadow:0 3px 10px rgba(0,0,0,.25)}
+    /* 返回菜单按钮 */
+    .back-btn{position:fixed;top:16px;left:16px;padding:10px 14px;border-radius:999px;background:linear-gradient(135deg,#ff9fb5,#ff4b6e);color:#fff;text-decoration:none;font-weight:700;box-shadow:0 8px 18px rgba(0,0,0,.12);transition:transform .15s ease,box-shadow .15s ease}
+    .back-btn:hover{transform:translateY(-1px);box-shadow:0 12px 24px rgba(0,0,0,.16)}
+    @media (max-width:540px){h1{font-size:20px}.panel{min-width:100%;gap:8px}input,select{padding:10px 12px;font-size:14px}.stage{width:92vmin;height:92vmin}.back-btn{padding:12px 16px;font-size:14px}}
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-btn" aria-label="返回菜单">← 返回菜单</a>
+  <div class="app">
+    <div class="card">
+      <h1>动态大爱心</h1>
+      <div class="top">
+        <div class="stage">
+          <canvas id="c"></canvas>
+          <div id="overlayText"></div>
+        </div>
+        <div class="panel">
+          <label>爱心文字</label>
+          <input id="textInput" type="text" placeholder="输入你想写在爱心上的话">
+          <label>字体大小</label>
+          <select id="fontSize"><option value="24">24</option><option value="32" selected>32</option><option value="40">40</option><option value="56">56</option><option value="72">72</option></select>
+          <label>文字颜色</label>
+          <input id="fontColor" type="color" value="#ffffff">
+          <div class="btns"><button id="apply" class="primary">添加文字</button></div>
+          <div class="tip">提示：点击“添加文字”后，文字将显示在爱心中央；可用下拉与颜色选择器调整样式，移动端也已适配。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const canvas=document.getElementById('c');const ctx=canvas.getContext('2d');const overlay=document.getElementById('overlayText');let DPR=Math.max(1,Math.floor(window.devicePixelRatio||1));
+    function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;canvas.width=w*DPR;canvas.height=h*DPR;ctx.setTransform(DPR,0,0,DPR,0,0)}
+    window.addEventListener('resize',resize);resize();
+    let t=0;let particles=[];
+    function spawn(){for(let i=0;i<2;i++){particles.push({x:Math.random(),y:1+Math.random()*0.1,vy:0.004+Math.random()*0.008,size:6+Math.random()*10,life:1,color:`hsl(${340+Math.random()*20},80%,${55+Math.random()*20}%)`})}if(particles.length>180)particles=particles.slice(-160)}
+    function drawParticles(W,H){for(const p of particles){p.y-=p.vy;p.life-=0.006;if(p.life<=0)continue;const x=p.x*W;const y=p.y*H;ctx.save();ctx.translate(x,y);ctx.rotate(-0.2);ctx.fillStyle=p.color;heartShape(ctx,p.size);ctx.globalAlpha=Math.max(0,p.life);ctx.fill();ctx.restore()}particles=particles.filter(p=>p.life>0&&p.y>-0.05)}
+    function heartShape(ctx,r){ctx.beginPath();for(let i=0;i<=100;i++){const ang=i/100*Math.PI*2;const x=16*Math.pow(Math.sin(ang),3);const y=13*Math.cos(ang)-5*Math.cos(2*ang)-2*Math.cos(3*ang)-Math.cos(4*ang);const X=x*(r/18),Y=-y*(r/18);if(i===0)ctx.moveTo(X,Y);else ctx.lineTo(X,Y)}ctx.closePath()}
+    function drawHeart(){const W=canvas.width/DPR,H=canvas.height/DPR;ctx.clearRect(0,0,W,H);const cx=W/2,cy=H/2;const pulse=1+0.04*Math.sin(t*0.08);const base=Math.min(W,H)*0.36*pulse;ctx.save();ctx.translate(cx,cy);heartShape(ctx,base);const grd=ctx.createRadialGradient(-base*0.2,-base*0.2,base*0.1,0,0,base*1.05);grd.addColorStop(0,'#ff9fb5');grd.addColorStop(0.55,'#ff577a');grd.addColorStop(1,'#e61e53');ctx.fillStyle=grd;ctx.fill();ctx.shadowColor='rgba(230,30,83,.55)';ctx.shadowBlur=26;ctx.shadowOffsetY=6;ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=2;ctx.stroke();ctx.globalCompositeOperation='source-over';ctx.restore();ctx.save();ctx.translate(cx,cy-base*0.25);ctx.rotate(-0.12);ctx.fillStyle='rgba(255,255,255,.25)';ctx.beginPath();ctx.ellipse(0,0,base*0.38,base*0.16,0,0,Math.PI*2);ctx.fill();ctx.restore();spawn();drawParticles(W,H);t++;}
+    let text='';let fontSz=32;let fontColor='#ffffff';
+    function applyText(){text=document.getElementById('textInput').value.trim();fontSz=parseInt(document.getElementById('fontSize').value)||32;fontColor=document.getElementById('fontColor').value||'#ffffff';overlay.textContent=text;overlay.style.fontSize=fontSz+'px';overlay.style.fontWeight='800';overlay.style.lineHeight='1.2';overlay.style.maxWidth='70%';overlay.style.filter='drop-shadow(0 4px 10px rgba(0,0,0,.25))';overlay.style.whiteSpace='pre-wrap';overlay.style.color=fontColor;fitOverlay()}
+    function fitOverlay(){if(!text)return;const stage=document.querySelector('.stage');const maxW=stage.clientWidth*0.7;const cur=parseInt(getComputedStyle(overlay).fontSize)||fontSz;let f=cur;overlay.style.fontSize=f+'px';if(overlay.scrollWidth>maxW){while(f>14&&overlay.scrollWidth>maxW){f-=1;overlay.style.fontSize=f+'px'}}}
+    document.getElementById('apply').addEventListener('click',applyText);
+    document.getElementById('fontSize').addEventListener('change',applyText);
+    document.getElementById('fontColor').addEventListener('input',()=>{overlay.style.color=document.getElementById('fontColor').value});
+    function loop(){drawHeart();requestAnimationFrame(loop)}
+    loop();
+  </script>
+</body>
+</html>
